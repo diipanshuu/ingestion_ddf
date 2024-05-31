@@ -93,6 +93,7 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
         ingestionRequestDetails.setRequestedByMudid(ingestionRequest.getRequesterMudid());
         ingestionRequestDetails.setRequestedByEmail(ingestionRequest.getRequesterEmail());
         ingestionRequestDetails.setRequestRationaleReason(ingestionRequest.getRequestRationaleReason());
+        ingestionRequestDetails.setModifiedReason(ingestionRequest.getModifiedReason());
 
         DatasetDetails datasetDetails = new DatasetDetails();
         if (ingestionRequestDetails.getDatasetDetails() == null){
