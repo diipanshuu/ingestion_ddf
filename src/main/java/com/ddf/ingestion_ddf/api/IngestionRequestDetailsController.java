@@ -39,7 +39,7 @@ public interface IngestionRequestDetailsController {
             @RequestParam(name = "status", defaultValue = "All") IngestionRequestStatus status,
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "per_page", defaultValue = "20") int perPage,
-            @RequestParam(name = "order_by", defaultValue = "MODIFIED_DATE") OrderByField orderBy,
+            @RequestParam(name = "order_by", defaultValue = "modifiedDate") OrderByField orderBy,
             @RequestParam(name = "order_direction", defaultValue = "DESC") OrderDirection orderDirection
     );
 }

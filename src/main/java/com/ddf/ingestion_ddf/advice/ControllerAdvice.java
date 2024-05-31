@@ -11,7 +11,7 @@ public class ControllerAdvice {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorDTO> handleMethodArgumentTypeMismatch(){
         ErrorDTO errorDto = new ErrorDTO();
-        errorDto.setMessage("Invalid order_by field. Please specify a valid value like: MODIFIED_DATE");
+        errorDto.setMessage("Invalid order_by field. Please specify a valid value like: modifiedDate");
 
         return new ResponseEntity<>(errorDto, HttpStatusCode.valueOf(400));
     }
