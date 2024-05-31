@@ -10,6 +10,12 @@ INSERT INTO public.status (status_id, status_code, status_name) VALUES
                                                                     (6, 'status06', 'Ingestion Failure'),
                                                                     (7, 'status07', 'Rejected');
 
+-- Seed data for email_template
+-- INSERT INTO public.email_template (subject, body)
+-- VALUES ('Ingestion Request Status Approved', 'The request is changed from TRIAGE PENDING APPROVAL to APPROVED');
+-- VALUES ('Ingestion Request Status Rejected', 'The request is changed from TRIAGE PENDING APPROVAL to REJECTED');
+
+
 -- Seed data for application_reference_table
 INSERT INTO public.application_reference_table
 (reference_id, created_by, created_date, modified_by, modified_date, reference_data, reference_data_type, reference_group_type, reference_order) VALUES

@@ -11,6 +11,7 @@ import com.ddf.ingestion_ddf.request.mappers.IngestionRequest;
 import com.ddf.ingestion_ddf.response.mappers.IngestionRequestDetailsDTO;
 import com.ddf.ingestion_ddf.response.mappers.IngestionRequestSummaryDTO;
 import com.ddf.ingestion_ddf.response.mappers.RequestStatusDetailsDTO;
+import com.ddf.ingestion_ddf.service.EmailService;
 import com.ddf.ingestion_ddf.service.IngestionRequestDetailsService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +34,8 @@ import java.util.*;
 @Service
 public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetailsService {
 
+    private final EmailService emailService;
+    private final EmailTemplateRepository emailTemplateRepository;
     private ValidationNotesRepository validationNotesRepository;
     private StatusRepository statusRepository;
     private IngestionRequestDetailsRepository ingestionRequestDetailsRepository;
@@ -49,13 +52,15 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
      * @param technicalDetailsRepository the repository for technical details
      */
     public IngestionRequestDetailsServiceImpl(IngestionRequestDetailsRepository ingestionRequestDetailsRepository, StatusRepository statusRepository,
-                                              ValidationNotesRepository validationNotesRepository,RequestStatusDetailsRepository requestStatusRepository,
-                                              TechnicalDetailsRepository technicalDetailsRepository) {
+                                              ValidationNotesRepository validationNotesRepository, RequestStatusDetailsRepository requestStatusRepository,
+                                              TechnicalDetailsRepository technicalDetailsRepository, EmailService emailService, EmailTemplateRepository emailTemplateRepository) {
         this.ingestionRequestDetailsRepository = ingestionRequestDetailsRepository;
         this.statusRepository =statusRepository;
         this.validationNotesRepository = validationNotesRepository;
         this.requestStatusRepository = requestStatusRepository;
         this.technicalDetailsRepository = technicalDetailsRepository;
+        this.emailService = emailService;
+        this.emailTemplateRepository = emailTemplateRepository;
     }
 
     /**
@@ -372,6 +377,14 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
                             newRequestStatusDetails.setDecisionDate(new Date());
                             // For decisionByName, decisionByMudid, decisionByEmail values are not stored as user login functionality is not included as Authentication or Authorization is not included
                             // For notify_through_email value nothing is provided for Email Template Data for Email Sending so not working with this value
+                            if(decisionRequestDTO.getNotifyThroughEmail()){
+                                emailService.sendEmail(requestDetailsOptional.get().getRequesterEmail(), "Ingestion Request Status Approved", "The request is changed from " + validPreviousStatusOfRequest.get(IngestionStatus.APPROVED) + " to APPROVED");
+                                emailService.sendEmail(requestDetailsOptional.get().getRequestedByEmail(), "Ingestion Request Status Approved", "The request is changed from " + validPreviousStatusOfRequest.get(IngestionStatus.APPROVED) + " to APPROVED");
+                                EmailTemplate emailTemplate = new EmailTemplate();
+                                emailTemplate.setSubject("Ingestion Request Status Approved");
+                                emailTemplate.setBody("The request is changed from " + validPreviousStatusOfRequest.get(IngestionStatus.APPROVED) + " to APPROVED");
+                                emailTemplateRepository.save(emailTemplate);
+                            }
                         }
                         // Update technical details if provided
                         if (decisionRequestDTO.getExistingDataLocationIdentified() != null && !decisionRequestDTO.getExistingDataLocationIdentified().isEmpty()) {
