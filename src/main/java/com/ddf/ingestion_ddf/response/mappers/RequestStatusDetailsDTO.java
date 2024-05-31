@@ -35,7 +35,7 @@ public class RequestStatusDetailsDTO {
     private String rejectionReason;
 
     /** Flag indicating whether the status is active. */
-    private Byte activeFlag;
+    private Boolean activeFlag;
 
     /** Status of the request. */
     private Status status;

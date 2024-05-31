@@ -30,7 +30,7 @@ public class RequestStatusDetails extends BaseModel{
     private Date decisionDate;
     private String decisionComments;
     private String rejectionReason;
-    private Byte activeFlag;
+    private Boolean activeFlag;
 
 }
 

@@ -24,13 +24,13 @@ public class DatasetDetails extends BaseModel{
     private String datasetName;
     private String datasetOriginSource;
     private String currentDataLocationRef;
-    private Byte meteorSpaceDominoUsageFlag;
-    private Byte ihdFlag;
+    private Boolean meteorSpaceDominoUsageFlag;
+    private Boolean ihdFlag;
     private String datasetRequiredForRef;
     private String estimatedDataVolumeRef;
     private Date analysisInitDt;
     private Date analysisEndDt;
-    private Byte dtaContractCompleteFlag;
+    private Boolean dtaContractCompleteFlag;
     private Date dtaExpectedCompletionDate;
     private String datasetTypeRef;
     private String informationClassificationTypeRef;

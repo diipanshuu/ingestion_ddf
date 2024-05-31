@@ -102,13 +102,13 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
         datasetDetails.setDatasetName(ingestionRequest.getDatasetName());
         datasetDetails.setDatasetOriginSource(ingestionRequest.getDatasetOriginSource());
         datasetDetails.setCurrentDataLocationRef(ingestionRequest.getCurrentDataLocationRef());
-        datasetDetails.setMeteorSpaceDominoUsageFlag((byte) (ingestionRequest.getMeteorSpaceDominoUsageFlag()?1:0));
-        datasetDetails.setIhdFlag((byte) (ingestionRequest.getIhdFlag()?1:0));
+        datasetDetails.setMeteorSpaceDominoUsageFlag(ingestionRequest.getMeteorSpaceDominoUsageFlag());
+        datasetDetails.setIhdFlag(ingestionRequest.getIhdFlag());
         datasetDetails.setEstimatedDataVolumeRef(ingestionRequest.getEstimatedDataVolumeRef());
 
         datasetDetails.setAnalysisInitDt(ingestionRequest.getAnalysisInitDt());
         datasetDetails.setAnalysisEndDt(ingestionRequest.getAnalysisEndDt());
-        datasetDetails.setDtaContractCompleteFlag((byte) (ingestionRequest.getDtaContractCompleteFlag()?1:0));
+        datasetDetails.setDtaContractCompleteFlag(ingestionRequest.getDtaContractCompleteFlag());
         if(!ingestionRequest.getDtaContractCompleteFlag()){
             datasetDetails.setDtaExpectedCompletionDate(ingestionRequest.getDtaExpectedCompletionDate());
         }
@@ -294,7 +294,7 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
         }
         requestStatusDetails.setStatus(status);
         requestStatusDetails.setIngestionRequest(ingestionRequestDetails);
-        requestStatusDetails.setActiveFlag((byte) 1);
+        requestStatusDetails.setActiveFlag(true);
         requestStatusDetails.setCreatedBy(createdBy);
         requestStatusDetails.setModifiedBy(modifiedBy);
         requestStatusDetailsList.add(requestStatusDetails);
@@ -352,8 +352,8 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
             if (requestStatusDetailsList != null && !requestStatusDetailsList.isEmpty()) {
                 // Loop through existing status details and deactivate the current active status
                 for (RequestStatusDetails requestStatus : requestStatusDetailsList) {
-                    if (requestStatus.getActiveFlag() == 1 && requestStatus.getStatus().getStatusName().equalsIgnoreCase(validPreviousStatusOfRequest.getOrDefault(newStatus,null))) {
-                        requestStatus.setActiveFlag((byte) 0);
+                    if (requestStatus.getActiveFlag() && requestStatus.getStatus().getStatusName().equalsIgnoreCase(validPreviousStatusOfRequest.getOrDefault(newStatus,null))) {
+                        requestStatus.setActiveFlag(false);
                         requestStatus.setModifiedBy(modifyBy);
                         statusUpdated = true;
                     }
@@ -363,7 +363,7 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
                     // Create a new status detail record for the new status
                     RequestStatusDetails newRequestStatusDetails = new RequestStatusDetails();
                     newRequestStatusDetails.setIngestionRequest(requestDetails);
-                    newRequestStatusDetails.setActiveFlag((byte) 1);
+                    newRequestStatusDetails.setActiveFlag(true);
                     newRequestStatusDetails.setCreatedBy(createdBy);
                     newRequestStatusDetails.setModifiedBy(modifyBy);
                     newRequestStatusDetails.setStatus(statusRepository.findByStatusNameIgnoreCase(newStatus.toString()));
@@ -436,13 +436,13 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
 
             ingestRequestDetailsDTO.setDatasetOriginSource(datasetDetails.getDatasetOriginSource());
             ingestRequestDetailsDTO.setCurrentDataLocationRef(datasetDetails.getCurrentDataLocationRef());
-            ingestRequestDetailsDTO.setMeteorSpaceDominoUsageFlag(datasetDetails.getMeteorSpaceDominoUsageFlag()==1?true:false);
-            ingestRequestDetailsDTO.setIhdFlag(datasetDetails.getIhdFlag()==1?true:false);
+            ingestRequestDetailsDTO.setMeteorSpaceDominoUsageFlag(datasetDetails.getMeteorSpaceDominoUsageFlag());
+            ingestRequestDetailsDTO.setIhdFlag(datasetDetails.getIhdFlag());
             ingestRequestDetailsDTO.setDatasetRequiredForRef(datasetDetails.getDatasetRequiredForRef());
             ingestRequestDetailsDTO.setEstimatedDataVolumeRef(datasetDetails.getEstimatedDataVolumeRef());
             ingestRequestDetailsDTO.setAnalysisInitDt(datasetDetails.getAnalysisInitDt());
             ingestRequestDetailsDTO.setAnalysisEndDt(datasetDetails.getAnalysisEndDt());
-            ingestRequestDetailsDTO.setDtaContractCompleteFlag(datasetDetails.getDtaContractCompleteFlag()==1?true:false);
+            ingestRequestDetailsDTO.setDtaContractCompleteFlag(datasetDetails.getDtaContractCompleteFlag());
             ingestRequestDetailsDTO.setDtaExpectedCompletionDate(datasetDetails.getDtaExpectedCompletionDate());
             ingestRequestDetailsDTO.setDatasetTypeRef(datasetDetails.getDatasetTypeRef());
             ingestRequestDetailsDTO.setContractPartner(datasetDetails.getContractPartner());
@@ -552,7 +552,7 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
 
         // Find the active request status from the list
         RequestStatusDetails activeRequestStatus = requestStatusDetails.stream()
-                .filter(status -> status.getActiveFlag() != null && status.getActiveFlag() == 1)
+                .filter(status -> status.getActiveFlag() != null && status.getActiveFlag())
                 .findFirst()
                 .orElse(null);
 
@@ -614,7 +614,7 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
 
         IngestionRequestSummaryDTO summary = new IngestionRequestSummaryDTO();
         Page<IngestionRequestDetails> requestDetails = null;
-        Byte activeFlag = 1;
+        Boolean activeFlag = true;
         if(!myApprovals){
             if(mySubmissions){
                 // Filter requests based on status

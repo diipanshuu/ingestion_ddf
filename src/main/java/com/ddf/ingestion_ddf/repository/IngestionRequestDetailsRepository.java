@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface IngestionRequestDetailsRepository extends JpaRepository<IngestionRequestDetails, Long> {
 
-    Page<IngestionRequestDetails> findByRequestStatusDetailsStatusStatusNameInAndRequestStatusDetailsActiveFlag(List<String> statusNames, Byte ActiveFlag, Pageable pageable);
-    int countByRequestStatusDetailsStatusStatusNameInAndRequestStatusDetailsActiveFlag(List<String> statusNames, Byte ActiveFlag);
+    Page<IngestionRequestDetails> findByRequestStatusDetailsStatusStatusNameInAndRequestStatusDetailsActiveFlag(List<String> statusNames, Boolean ActiveFlag, Pageable pageable);
+    int countByRequestStatusDetailsStatusStatusNameInAndRequestStatusDetailsActiveFlag(List<String> statusNames, Boolean ActiveFlag);
 
     //We can use below methods instead of above methods for the Logged-in User ID as it is My-Submission
 //    Page<IngestionRequestDetails> findByRequestStatusDetailsStatusStatusNameInAndRequestStatusDetailsActiveFlagAndCreatedBy(List<String> statusNames, Byte ActiveFlag,String createdBy, Pageable pageable);
