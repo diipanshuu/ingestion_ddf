@@ -276,7 +276,7 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
         technicalDetails.setExternalStagingContainerName(ingestionRequest.getExternalStagingContainerName());
         technicalDetails.setDomainRequestId(ingestionRequest.getDomainRequestId());
         technicalDetails.setExternalDataSourceLocation(ingestionRequest.getExternalDataSourceLocation());
-        technicalDetails.setGckAccessSourceLocationRef(ingestionRequest.getGskAccessSourceLocationRef());
+        technicalDetails.setGskAccessSourceLocationRef(ingestionRequest.getGskAccessSourceLocationRef());
         technicalDetails.setExternalSourceSecretKeyName(ingestionRequest.getExternalSourceSecretKeyName());
         technicalDetails.setIngestionRequest(ingestionRequestDetails);
 
@@ -521,7 +521,7 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
             ingestRequestDetailsDTO.setExternalStagingContainerName(technicalDetails.getExternalStagingContainerName());
             ingestRequestDetailsDTO.setDomainRequestId(technicalDetails.getDomainRequestId());
             ingestRequestDetailsDTO.setExternalDataSourceLocation(technicalDetails.getExternalDataSourceLocation());
-            ingestRequestDetailsDTO.setGskAccessSourceLocationRef(technicalDetails.getGckAccessSourceLocationRef());
+            ingestRequestDetailsDTO.setGskAccessSourceLocationRef(technicalDetails.getGskAccessSourceLocationRef());
             ingestRequestDetailsDTO.setExternalSourceSecretKeyName(technicalDetails.getExternalSourceSecretKeyName());
             ingestRequestDetailsDTO.setExistingDataLocationIdentified(technicalDetails.getExistingDataLocationIdentified());
 

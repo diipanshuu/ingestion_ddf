@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS public.technical_details
     external_data_source_location character varying(255) COLLATE pg_catalog."default",
     external_source_secret_key_name character varying(255) COLLATE pg_catalog."default",
     external_staging_container_name character varying(255) COLLATE pg_catalog."default",
-    gck_access_source_location_ref character varying(255) COLLATE pg_catalog."default",
+    gsk_access_source_location_ref character varying(255) COLLATE pg_catalog."default",
     guest_users_email character varying(255) COLLATE pg_catalog."default",
     target_ingestion_end_date timestamp without time zone,
     target_ingestion_start_date timestamp without time zone,

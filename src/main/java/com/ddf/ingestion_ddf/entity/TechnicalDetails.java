@@ -30,7 +30,7 @@ public class TechnicalDetails extends BaseModel{
     private String whitelistIpAddresses;
     private String externalStagingContainerName;
     private String externalDataSourceLocation;
-    private String gckAccessSourceLocationRef;
+    private String gskAccessSourceLocationRef;
     private String externalSourceSecretKeyName;
     private String domainRequestId;
     private String existingDataLocationIdentified;
