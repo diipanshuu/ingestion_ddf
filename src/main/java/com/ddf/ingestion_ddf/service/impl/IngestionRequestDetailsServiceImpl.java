@@ -115,105 +115,101 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
         }
 
         datasetDetails.setDatasetTypeRef(ingestionRequest.getDatasetTypeRef());
+        datasetDetails.setDatasetRequiredForRef(ingestionRequest.getDatasetRequiredForRef());
 
         List<DatasetRoleDetails> datasetRoleDetails = new ArrayList<>();
         // Check the datasetRequiredForRef to determine further dataset details
-        if(ingestionRequest.getDatasetRequiredForRef().equalsIgnoreCase("Exploration")){
-            // Populate dataset details for exploration type
-            datasetDetails.setContractPartner(ingestionRequest.getContractPartner());
-            datasetDetails.setRetentionRules(ingestionRequest.getRetentionRules());
-            datasetDetails.setRetentionRulesContractDate(ingestionRequest.getRetentionRulesContractDate());
-            datasetDetails.setInformationClassificationTypeRef(ingestionRequest.getInformationClassificationTypeRef());
-            datasetDetails.setPiiTypeRef(ingestionRequest.getPiiTypeRef());
+        // Populate dataset details for exploration type
+        datasetDetails.setContractPartner(ingestionRequest.getContractPartner());
+        datasetDetails.setRetentionRules(ingestionRequest.getRetentionRules());
+        datasetDetails.setRetentionRulesContractDate(ingestionRequest.getRetentionRulesContractDate());
+        datasetDetails.setInformationClassificationTypeRef(ingestionRequest.getInformationClassificationTypeRef());
+        datasetDetails.setPiiTypeRef(ingestionRequest.getPiiTypeRef());
 
-            // Populate dataset user usage restrictions
-            List<DatasetUserUsageRestriction> datasetUserUsageRestrictionList = new ArrayList<>();
-            if(ingestionRequest.getUsageRestrictions() != null && !ingestionRequest.getUsageRestrictions().isEmpty()) {
-                for(String usage :ingestionRequest.getUsageRestrictions()){
-                    DatasetUserUsageRestriction datasetUserUsageRestriction = new DatasetUserUsageRestriction();
-                    datasetUserUsageRestriction.setDatasetId(datasetDetails);
-                    datasetUserUsageRestriction.setRestrictionTypeRef("usage_restrictions");
-                    datasetUserUsageRestriction.setRestrictionRef(usage);
-                    if (datasetDetails.getDatasetUserUsageRestriction() == null) {
-                        datasetUserUsageRestriction.setCreatedBy(createdBy);
-                    }
-                    datasetUserUsageRestriction.setModifiedBy(modifiedBy);
-                    datasetUserUsageRestrictionList.add(datasetUserUsageRestriction);
+        // Populate dataset user usage restrictions
+        List<DatasetUserUsageRestriction> datasetUserUsageRestrictionList = new ArrayList<>();
+        if(ingestionRequest.getUsageRestrictions() != null && !ingestionRequest.getUsageRestrictions().isEmpty()) {
+            for(String usage :ingestionRequest.getUsageRestrictions()){
+                DatasetUserUsageRestriction datasetUserUsageRestriction = new DatasetUserUsageRestriction();
+                datasetUserUsageRestriction.setDatasetId(datasetDetails);
+                datasetUserUsageRestriction.setRestrictionTypeRef("usage_restrictions");
+                datasetUserUsageRestriction.setRestrictionRef(usage);
+                if (datasetDetails.getDatasetUserUsageRestriction() == null) {
+                    datasetUserUsageRestriction.setCreatedBy(createdBy);
                 }
+                datasetUserUsageRestriction.setModifiedBy(modifiedBy);
+                datasetUserUsageRestrictionList.add(datasetUserUsageRestriction);
             }
-
-            // Populate dataset user restrictions
-            if(ingestionRequest.getUserRestrictions() != null && !ingestionRequest.getUserRestrictions().isEmpty()) {
-                for(String usage :ingestionRequest.getUserRestrictions()){
-                    DatasetUserUsageRestriction datasetUserUsageRestriction = new DatasetUserUsageRestriction();
-                    datasetUserUsageRestriction.setDatasetId(datasetDetails);
-                    datasetUserUsageRestriction.setRestrictionTypeRef("user_restrictions");
-                    datasetUserUsageRestriction.setRestrictionRef(usage);
-                    if (datasetDetails.getDatasetUserUsageRestriction() == null) {
-                        datasetUserUsageRestriction.setCreatedBy(createdBy);
-                    }
-                    datasetUserUsageRestriction.setModifiedBy(modifiedBy);
-                    datasetUserUsageRestrictionList.add(datasetUserUsageRestriction);
-                }
-            }
-            if(datasetUserUsageRestrictionList.size() > 0){
-                datasetDetails.setDatasetUserUsageRestriction(datasetUserUsageRestrictionList);
-            }
-
-            // Populate dataset role details for data owner role
-            DatasetRoleDetails datasetOwnerDetails = new DatasetRoleDetails();
-            datasetOwnerDetails.setRole("data owner");
-            datasetOwnerDetails.setName(ingestionRequest.getDatasetOwnerName());
-            datasetOwnerDetails.setMudid(ingestionRequest.getDatasetOwnerMudid());
-            datasetOwnerDetails.setEmail(ingestionRequest.getDatasetOwnerEmail());
-            datasetOwnerDetails.setDatasetId(datasetDetails);
-            datasetRoleDetails.add(datasetOwnerDetails);
-
-            // Populate dataset role details for data steward role
-            DatasetRoleDetails datasetStewardDetails = new DatasetRoleDetails();
-            datasetStewardDetails.setRole("data steward");
-            datasetStewardDetails.setName(ingestionRequest.getDatasetStewardName());
-            datasetStewardDetails.setMudid(ingestionRequest.getDatasetStewardMudid());
-            datasetStewardDetails.setEmail(ingestionRequest.getDatasetStewardEmail());
-            datasetStewardDetails.setDatasetId(datasetDetails);
-            datasetRoleDetails.add(datasetStewardDetails);
-
         }
-        else {
-            // If dataset is not for exploration or is industrialization, set therapy areas, techniques & assays, and indications
-            List<DatasetTherapy> datasetTherapies = new ArrayList<>();
-            List<DatasetTechAndAssay> datasetTechAndAssays = new ArrayList<>();
-            List<DatasetIndication> datasetIndications = new ArrayList<>();
-            if(ingestionRequest.getTherapyAreas() != null && !ingestionRequest.getTherapyAreas().isEmpty()) {
-                for(String therapy :ingestionRequest.getTherapyAreas()){
-                    DatasetTherapy  datasetTherapy= new DatasetTherapy();
-                    datasetTherapy.setDatasetId(datasetDetails);
-                    datasetTherapy.setTherapy(therapy);
-                    datasetTherapies.add(datasetTherapy);
-                }
-                datasetDetails.setDatasetTherapies(datasetTherapies);
-            }
 
-            if(ingestionRequest.getTechniqueAndAssays() != null && !ingestionRequest.getTechniqueAndAssays().isEmpty()) {
-                for(String technique :ingestionRequest.getTechniqueAndAssays()){
-                    DatasetTechAndAssay datasetTechAndAssay = new DatasetTechAndAssay();
-                    datasetTechAndAssay.setDatasetId(datasetDetails);
-                    datasetTechAndAssay.setTechniqueAndAssay(technique);
-                    datasetTechAndAssays.add(datasetTechAndAssay);
+        // Populate dataset user restrictions
+        if(ingestionRequest.getUserRestrictions() != null && !ingestionRequest.getUserRestrictions().isEmpty()) {
+            for(String usage :ingestionRequest.getUserRestrictions()){
+                DatasetUserUsageRestriction datasetUserUsageRestriction = new DatasetUserUsageRestriction();
+                datasetUserUsageRestriction.setDatasetId(datasetDetails);
+                datasetUserUsageRestriction.setRestrictionTypeRef("user_restrictions");
+                datasetUserUsageRestriction.setRestrictionRef(usage);
+                if (datasetDetails.getDatasetUserUsageRestriction() == null) {
+                    datasetUserUsageRestriction.setCreatedBy(createdBy);
                 }
-                datasetDetails.setDatasetTechAndAssays(datasetTechAndAssays);
+                datasetUserUsageRestriction.setModifiedBy(modifiedBy);
+                datasetUserUsageRestrictionList.add(datasetUserUsageRestriction);
             }
+        }
+        if(datasetUserUsageRestrictionList.size() > 0){
+            datasetDetails.setDatasetUserUsageRestriction(datasetUserUsageRestrictionList);
+        }
 
-            if(ingestionRequest.getIndications() != null && !ingestionRequest.getIndications().isEmpty()) {
-                for(String indication :ingestionRequest.getIndications()){
-                    DatasetIndication datasetIndication = new DatasetIndication();
-                    datasetIndication.setDatasetId(datasetDetails);
-                    datasetIndication.setIndication(indication);
-                    datasetIndications.add(datasetIndication);
-                }
-                datasetDetails.setDatasetIndications(datasetIndications);
+        // Populate dataset role details for data owner role
+        DatasetRoleDetails datasetOwnerDetails = new DatasetRoleDetails();
+        datasetOwnerDetails.setRole("data owner");
+        datasetOwnerDetails.setName(ingestionRequest.getDatasetOwnerName());
+        datasetOwnerDetails.setMudid(ingestionRequest.getDatasetOwnerMudid());
+        datasetOwnerDetails.setEmail(ingestionRequest.getDatasetOwnerEmail());
+        datasetOwnerDetails.setDatasetId(datasetDetails);
+        datasetRoleDetails.add(datasetOwnerDetails);
+
+        // Populate dataset role details for data steward role
+        DatasetRoleDetails datasetStewardDetails = new DatasetRoleDetails();
+        datasetStewardDetails.setRole("data steward");
+        datasetStewardDetails.setName(ingestionRequest.getDatasetStewardName());
+        datasetStewardDetails.setMudid(ingestionRequest.getDatasetStewardMudid());
+        datasetStewardDetails.setEmail(ingestionRequest.getDatasetStewardEmail());
+        datasetStewardDetails.setDatasetId(datasetDetails);
+        datasetRoleDetails.add(datasetStewardDetails);
+
+        // If dataset is not for exploration or is industrialization, set therapy areas, techniques & assays, and indications
+        List<DatasetTherapy> datasetTherapies = new ArrayList<>();
+        List<DatasetTechAndAssay> datasetTechAndAssays = new ArrayList<>();
+        List<DatasetIndication> datasetIndications = new ArrayList<>();
+        if(ingestionRequest.getTherapyAreas() != null && !ingestionRequest.getTherapyAreas().isEmpty()) {
+            for(String therapy :ingestionRequest.getTherapyAreas()){
+                DatasetTherapy  datasetTherapy= new DatasetTherapy();
+                datasetTherapy.setDatasetId(datasetDetails);
+                datasetTherapy.setTherapy(therapy);
+                datasetTherapies.add(datasetTherapy);
             }
+            datasetDetails.setDatasetTherapies(datasetTherapies);
+        }
 
+        if(ingestionRequest.getTechniqueAndAssays() != null && !ingestionRequest.getTechniqueAndAssays().isEmpty()) {
+            for(String technique :ingestionRequest.getTechniqueAndAssays()){
+                DatasetTechAndAssay datasetTechAndAssay = new DatasetTechAndAssay();
+                datasetTechAndAssay.setDatasetId(datasetDetails);
+                datasetTechAndAssay.setTechniqueAndAssay(technique);
+                datasetTechAndAssays.add(datasetTechAndAssay);
+            }
+            datasetDetails.setDatasetTechAndAssays(datasetTechAndAssays);
+        }
+
+        if(ingestionRequest.getIndications() != null && !ingestionRequest.getIndications().isEmpty()) {
+            for(String indication :ingestionRequest.getIndications()){
+                DatasetIndication datasetIndication = new DatasetIndication();
+                datasetIndication.setDatasetId(datasetDetails);
+                datasetIndication.setIndication(indication);
+                datasetIndications.add(datasetIndication);
+            }
+            datasetDetails.setDatasetIndications(datasetIndications);
         }
 
         List<DatasetStudy> datasetStudies = new ArrayList<>();
