@@ -8,6 +8,7 @@ import com.ddf.ingestion_ddf.response.mappers.IngestionRequestDetailsDTO;
 import com.ddf.ingestion_ddf.response.mappers.IngestionRequestSummaryDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public interface IngestionRequestDetailsController {
     @Operation(summary = "Create a new Ingestion Request")
     ResponseEntity<IngestionRequestDetailsDTO> createIngestionRequest(
             @RequestParam(name = "submit", defaultValue = "false") boolean submit,
-            @RequestBody IngestionRequest requestDto);
+            @RequestBody @Valid IngestionRequest requestDto);
 
     @GetMapping("/{ingestion_request_id}")
     @Operation(summary = "Get Ingestion Request")

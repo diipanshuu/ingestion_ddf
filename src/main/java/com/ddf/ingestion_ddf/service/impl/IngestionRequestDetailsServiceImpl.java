@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-
 /**
  * Implementation of the {@link IngestionRequestDetailsService} interface.
  * This service provides methods to handle ingestion request details.
@@ -31,6 +30,7 @@ import java.util.*;
  * @version 1.0
  * @since 20/05/24
  */
+
 @Service
 public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetailsService {
 
@@ -72,7 +72,7 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
      * @return the DTO representation of the created ingestion request details
      */
     @Override
-    public IngestionRequestDetailsDTO createOrUpdateIngestionRequest(Long ingestionRequestId,IngestionRequest ingestionRequest, boolean submit) {
+    public IngestionRequestDetailsDTO createOrUpdateIngestionRequest(Long ingestionRequestId, IngestionRequest ingestionRequest, boolean submit) {
         IngestionRequestDetails ingestionRequestDetails = new IngestionRequestDetails();;
 
         // As logged-in user details are not available, using static emails for createdBy and modifiedBy
@@ -381,8 +381,8 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
                                 emailService.sendEmail(requestDetailsOptional.get().getRequesterEmail(), "Ingestion Request Status Approved", "The request is changed from " + validPreviousStatusOfRequest.get(IngestionStatus.APPROVED) + " to APPROVED");
                                 emailService.sendEmail(requestDetailsOptional.get().getRequestedByEmail(), "Ingestion Request Status Approved", "The request is changed from " + validPreviousStatusOfRequest.get(IngestionStatus.APPROVED) + " to APPROVED");
                                 EmailTemplate emailTemplate = new EmailTemplate();
-                                emailTemplate.setSubject("Ingestion Request Status Approved");
-                                emailTemplate.setBody("The request is changed from " + validPreviousStatusOfRequest.get(IngestionStatus.APPROVED) + " to APPROVED");
+                                emailTemplate.setSubject("Ingestion Request Status " + newStatus.toString());
+                                emailTemplate.setBody("The request is changed from " + validPreviousStatusOfRequest.get(IngestionStatus.APPROVED) + " to " + newStatus.toString());
                                 emailTemplateRepository.save(emailTemplate);
                             }
                         }

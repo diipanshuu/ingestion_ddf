@@ -2,6 +2,7 @@ package com.ddf.ingestion_ddf.controller;
 
 import com.ddf.ingestion_ddf.api.IngestionRequestStatusController;
 import com.ddf.ingestion_ddf.enums.IngestionStatus;
+import com.ddf.ingestion_ddf.repository.IngestionRequestDetailsRepository;
 import com.ddf.ingestion_ddf.request.mappers.DecisionRequestDTO;
 import com.ddf.ingestion_ddf.response.mappers.IngestionRequestDetailsDTO;
 import com.ddf.ingestion_ddf.service.IngestionRequestDetailsService;
@@ -12,9 +13,12 @@ import org.springframework.web.bind.annotation.*;
 public class IngestionRequestStatusControllerImpl implements IngestionRequestStatusController {
 
     private IngestionRequestDetailsService ingestionRequestDetailsService;
+    private IngestionRequestDetailsRepository ingestionRequestDetailsRepository;
 
-    public IngestionRequestStatusControllerImpl(IngestionRequestDetailsService ingestionRequestDetailsService) {
+    public IngestionRequestStatusControllerImpl(IngestionRequestDetailsService ingestionRequestDetailsService,
+                                                IngestionRequestDetailsRepository ingestionRequestDetailsRepository) {
         this.ingestionRequestDetailsService = ingestionRequestDetailsService;
+        this.ingestionRequestDetailsRepository = ingestionRequestDetailsRepository;
     }
 
     @Override
@@ -27,8 +31,12 @@ public class IngestionRequestStatusControllerImpl implements IngestionRequestSta
     public ResponseEntity<IngestionRequestDetailsDTO> approveIngestionRequest(
             Long ingestionRequestId,
             DecisionRequestDTO decisionRequestDTO) {
-        IngestionRequestDetailsDTO response = ingestionRequestDetailsService.updateIngestionRequestStatus(ingestionRequestId,IngestionStatus.APPROVED,decisionRequestDTO);
-        return ResponseEntity.ok(response);
+        if(ingestionRequestId != null && ingestionRequestId !=0 && ingestionRequestDetailsRepository.findById(ingestionRequestId).isPresent()){
+            IngestionRequestDetailsDTO response = ingestionRequestDetailsService.updateIngestionRequestStatus(ingestionRequestId,IngestionStatus.APPROVED,decisionRequestDTO);
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Override

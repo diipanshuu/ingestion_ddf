@@ -4,24 +4,32 @@ import com.ddf.ingestion_ddf.api.IngestionRequestDetailsController;
 import com.ddf.ingestion_ddf.enums.IngestionRequestStatus;
 import com.ddf.ingestion_ddf.enums.OrderByField;
 import com.ddf.ingestion_ddf.enums.OrderDirection;
+import com.ddf.ingestion_ddf.repository.IngestionRequestDetailsRepository;
 import com.ddf.ingestion_ddf.request.mappers.IngestionRequest;
 import com.ddf.ingestion_ddf.response.mappers.IngestionRequestDetailsDTO;
 import com.ddf.ingestion_ddf.response.mappers.IngestionRequestSummaryDTO;
 import com.ddf.ingestion_ddf.service.IngestionRequestDetailsService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Validated
 @RestController
 public class IngestionRequestDetailsControllerImpl implements IngestionRequestDetailsController {
 
     private IngestionRequestDetailsService ingestionRequestDetailsService;
+    private IngestionRequestDetailsRepository ingestionRequestDetailsRepository;
 
-    public IngestionRequestDetailsControllerImpl(IngestionRequestDetailsService ingestionRequestDetailsService) {
+    public IngestionRequestDetailsControllerImpl(IngestionRequestDetailsService ingestionRequestDetailsService, IngestionRequestDetailsRepository ingestionRequestDetailsRepository) {
         this.ingestionRequestDetailsService = ingestionRequestDetailsService;
+        this.ingestionRequestDetailsRepository = ingestionRequestDetailsRepository;
     }
 
     @Override
-    public ResponseEntity<IngestionRequestDetailsDTO> createIngestionRequest(boolean submit,IngestionRequest requestDto) {
+    public ResponseEntity<IngestionRequestDetailsDTO> createIngestionRequest(
+            boolean submit,
+            @Valid IngestionRequest requestDto) {
         IngestionRequestDetailsDTO response = ingestionRequestDetailsService.createOrUpdateIngestionRequest(null,requestDto, submit);
         return ResponseEntity.ok(response);
     }
@@ -41,8 +49,12 @@ public class IngestionRequestDetailsControllerImpl implements IngestionRequestDe
             Long ingestionRequestId,
             boolean submit,
             IngestionRequest requestDto) {
-        IngestionRequestDetailsDTO response = ingestionRequestDetailsService.createOrUpdateIngestionRequest(ingestionRequestId,requestDto, submit);
-        return ResponseEntity.ok(response);
+        if(ingestionRequestId != null && ingestionRequestId !=0 && ingestionRequestDetailsRepository.findById(ingestionRequestId).isPresent()) {
+            IngestionRequestDetailsDTO response = ingestionRequestDetailsService.createOrUpdateIngestionRequest(ingestionRequestId, requestDto, submit);
+            return ResponseEntity.ok(response);
+        }else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Override
