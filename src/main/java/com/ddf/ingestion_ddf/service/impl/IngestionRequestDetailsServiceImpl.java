@@ -1,11 +1,17 @@
 package com.ddf.ingestion_ddf.service.impl;
 
+import com.ddf.ingestion_ddf.constants.ApiConstants;
 import com.ddf.ingestion_ddf.entity.*;
 import com.ddf.ingestion_ddf.enums.IngestionRequestStatus;
 import com.ddf.ingestion_ddf.enums.IngestionStatus;
 import com.ddf.ingestion_ddf.enums.OrderByField;
 import com.ddf.ingestion_ddf.enums.OrderDirection;
-import com.ddf.ingestion_ddf.repository.*;
+import com.ddf.ingestion_ddf.repository.EmailTemplateRepository;
+import com.ddf.ingestion_ddf.repository.ValidationNotesRepository;
+import com.ddf.ingestion_ddf.repository.StatusRepository;
+import com.ddf.ingestion_ddf.repository.IngestionRequestDetailsRepository;
+import com.ddf.ingestion_ddf.repository.TechnicalDetailsRepository;
+import com.ddf.ingestion_ddf.repository.RequestStatusDetailsRepository;
 import com.ddf.ingestion_ddf.request.mappers.DecisionRequestDTO;
 import com.ddf.ingestion_ddf.request.mappers.IngestionRequest;
 import com.ddf.ingestion_ddf.response.mappers.IngestionRequestDetailsDTO;
@@ -32,36 +38,37 @@ import java.util.*;
  */
 
 @Service
-public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetailsService {
+    public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetailsService {
 
-    private final EmailService emailService;
-    private final EmailTemplateRepository emailTemplateRepository;
-    private ValidationNotesRepository validationNotesRepository;
-    private StatusRepository statusRepository;
-    private IngestionRequestDetailsRepository ingestionRequestDetailsRepository;
-    private RequestStatusDetailsRepository requestStatusRepository;
-    private TechnicalDetailsRepository technicalDetailsRepository;
+        private final EmailService emailService;
+        private final EmailTemplateRepository emailTemplateRepository;
+        private ValidationNotesRepository validationNotesRepository;
+        private StatusRepository statusRepository;
+        private IngestionRequestDetailsRepository ingestionRequestDetailsRepository;
+        private RequestStatusDetailsRepository requestStatusRepository;
+        private TechnicalDetailsRepository technicalDetailsRepository;
 
-    /**
-     * Constructs a new {@code IngestionRequestDetailsServiceImpl} with the specified repositories.
-     *
-     * @param ingestionRequestDetailsRepository the repository for ingestion request details
-     * @param statusRepository the repository for status data
-     * @param validationNotesRepository the repository for validation notes data
-     * @param requestStatusRepository the repository for request status details
-     * @param technicalDetailsRepository the repository for technical details
-     */
-    public IngestionRequestDetailsServiceImpl(IngestionRequestDetailsRepository ingestionRequestDetailsRepository, StatusRepository statusRepository,
-                                              ValidationNotesRepository validationNotesRepository, RequestStatusDetailsRepository requestStatusRepository,
-                                              TechnicalDetailsRepository technicalDetailsRepository, EmailService emailService, EmailTemplateRepository emailTemplateRepository) {
-        this.ingestionRequestDetailsRepository = ingestionRequestDetailsRepository;
-        this.statusRepository =statusRepository;
-        this.validationNotesRepository = validationNotesRepository;
-        this.requestStatusRepository = requestStatusRepository;
-        this.technicalDetailsRepository = technicalDetailsRepository;
-        this.emailService = emailService;
-        this.emailTemplateRepository = emailTemplateRepository;
-    }
+        /**
+         * Constructs a new {@code IngestionRequestDetailsServiceImpl} with the specified repositories.
+         *
+         * @param ingestionRequestDetailsRepository the repository for ingestion request details
+         * @param statusRepository the repository for status data
+         * @param validationNotesRepository the repository for validation notes data
+         * @param requestStatusRepository the repository for request status details
+         * @param technicalDetailsRepository the repository for technical details
+         */
+        public IngestionRequestDetailsServiceImpl(IngestionRequestDetailsRepository ingestionRequestDetailsRepository, StatusRepository statusRepository,
+                                                  ValidationNotesRepository validationNotesRepository, RequestStatusDetailsRepository requestStatusRepository,
+                                                  TechnicalDetailsRepository technicalDetailsRepository, EmailService emailService, EmailTemplateRepository emailTemplateRepository) {
+            this.ingestionRequestDetailsRepository = ingestionRequestDetailsRepository;
+            this.statusRepository =statusRepository;
+            this.validationNotesRepository = validationNotesRepository;
+            this.requestStatusRepository = requestStatusRepository;
+            this.technicalDetailsRepository = technicalDetailsRepository;
+            this.emailService = emailService;
+            this.emailTemplateRepository = emailTemplateRepository;
+        }
+
 
     /**
      * Creates an ingestion request with the provided details.
@@ -73,11 +80,13 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
      */
     @Override
     public IngestionRequestDetailsDTO createOrUpdateIngestionRequest(Long ingestionRequestId, IngestionRequest ingestionRequest, boolean submit) {
-        IngestionRequestDetails ingestionRequestDetails = new IngestionRequestDetails();;
+        IngestionRequestDetails ingestionRequestDetails = new IngestionRequestDetails();
 
         // As logged-in user details are not available, using static emails for createdBy and modifiedBy
-        String createdBy = "test@gmail.com";  // Update with logged-in user email
-        String modifiedBy = "testModifiy@gmail.com";  // Update with logged-in user email
+        //String createdBy = "test@gmail.com";
+        String createdBy = ApiConstants.DEFAULT_CREATED_BY; // Update with logged-in user email
+        String modifiedBy = ApiConstants.DEFAULT_MODIFIED_BY; // Update with logged-in user email
+        //String modifiedBy = "testModifiy@gmail.com";
 
         // Check if ingestionRequestId is provided and exists in the repository if exists then operation is Update Operation
         if(ingestionRequestId != null && ingestionRequestId !=0 && ingestionRequestDetailsRepository.findById(ingestionRequestId).isPresent()){
@@ -85,12 +94,17 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
             ingestionRequestDetails.setIngestionRequestId(ingestionRequestId);
             ingestionRequestDetails.setCreatedBy(details.getCreatedBy());
             ingestionRequestDetails.setCreatedDate(details.getCreatedDate());
+            ingestionRequestDetails.setModifiedBy(modifiedBy);
+            ingestionRequestDetails.setModifiedDate(new Date());
+            ingestionRequestDetails.setModifiedReason(ingestionRequest.getModifiedReason());
         }
         else {
+            // Create operation
             ingestionRequestDetails.setCreatedBy(createdBy);
         }
-        ingestionRequestDetails.setModifiedBy(modifiedBy);
 
+        // Common fields for both creation and update
+        ingestionRequestDetails.setModifiedBy(modifiedBy);
         ingestionRequestDetails.setRequesterName(ingestionRequest.getRequesterName());
         ingestionRequestDetails.setRequesterMudid(ingestionRequest.getRequesterMudid());
         ingestionRequestDetails.setRequesterEmail(ingestionRequest.getRequesterEmail());
@@ -98,7 +112,6 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
         ingestionRequestDetails.setRequestedByMudid(ingestionRequest.getRequesterMudid());
         ingestionRequestDetails.setRequestedByEmail(ingestionRequest.getRequesterEmail());
         ingestionRequestDetails.setRequestRationaleReason(ingestionRequest.getRequestRationaleReason());
-        ingestionRequestDetails.setModifiedReason(ingestionRequest.getModifiedReason());
 
         DatasetDetails datasetDetails = new DatasetDetails();
         if (ingestionRequestDetails.getDatasetDetails() == null){
@@ -305,6 +318,250 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
         return getIngestionRequestDetailsDTO(ingestionRequestDetailsRepository.save(ingestionRequestDetails));
     }
 
+//    /**
+//     * Creates or updates an ingestion request with the provided details.
+//     *
+//     * @param ingestionRequestId the ID of the ingestion request (optional) only required when ingestionRequest is updating
+//     * @param ingestionRequest the ingestion request details to add or update the IngestionRequestDetails and their related Data
+//     * @param submit a flag false to only create the request in DRAFT status, true to create the request in TRIAGE PENDING APPROVAL status
+//     * @return the DTO representation of the created or updated ingestion request details
+//     */
+//    @Override
+//    public IngestionRequestDetailsDTO createOrUpdateIngestionRequest(Long ingestionRequestId, IngestionRequest ingestionRequest, boolean submit) {
+//        IngestionRequestDetails ingestionRequestDetails;
+//        String createdBy = "test@gmail.com";  // Update with logged-in user email
+//        String modifiedBy = "testModifiy@gmail.com";  // Update with logged-in user email
+//
+//        // Check if ingestionRequestId is provided and exists in the repository
+//        if (ingestionRequestId != null && ingestionRequestId != 0 && ingestionRequestDetailsRepository.findById(ingestionRequestId).isPresent()) {
+//            // Update operation
+//            ingestionRequestDetails = ingestionRequestDetailsRepository.findById(ingestionRequestId).get();
+//            ingestionRequestDetails.setModifiedDate(new Date());
+//            ingestionRequestDetails.setModifiedReason(ingestionRequest.getModifiedReason());
+//        } else {
+//            // Create operation
+//            ingestionRequestDetails = new IngestionRequestDetails();
+//            ingestionRequestDetails.setCreatedBy(createdBy);
+//            ingestionRequestDetails.setCreatedDate(new Date());
+//        }
+//
+//        // Common fields for both creation and update
+//        ingestionRequestDetails.setModifiedBy(modifiedBy);
+//        ingestionRequestDetails.setRequesterName(ingestionRequest.getRequesterName());
+//        ingestionRequestDetails.setRequesterMudid(ingestionRequest.getRequesterMudid());
+//        ingestionRequestDetails.setRequesterEmail(ingestionRequest.getRequesterEmail());
+//        ingestionRequestDetails.setRequestedByName(ingestionRequest.getRequesterName());
+//        ingestionRequestDetails.setRequestedByMudid(ingestionRequest.getRequesterMudid());
+//        ingestionRequestDetails.setRequestedByEmail(ingestionRequest.getRequesterEmail());
+//        ingestionRequestDetails.setRequestRationaleReason(ingestionRequest.getRequestRationaleReason());
+//
+//        DatasetDetails datasetDetails = new DatasetDetails();
+//        if (ingestionRequestDetails.getDatasetDetails() == null){
+//            datasetDetails.setCreatedBy(createdBy);
+//        }
+//        datasetDetails.setModifiedBy(modifiedBy);
+//        datasetDetails.setDatasetName(ingestionRequest.getDatasetName());
+//        datasetDetails.setDatasetOriginSource(ingestionRequest.getDatasetOriginSource());
+//        datasetDetails.setCurrentDataLocationRef(ingestionRequest.getCurrentDataLocationRef());
+//        datasetDetails.setMeteorSpaceDominoUsageFlag(ingestionRequest.getMeteorSpaceDominoUsageFlag());
+//        datasetDetails.setIhdFlag(ingestionRequest.getIhdFlag());
+//        datasetDetails.setEstimatedDataVolumeRef(ingestionRequest.getEstimatedDataVolumeRef());
+//
+//        datasetDetails.setAnalysisInitDt(ingestionRequest.getAnalysisInitDt());
+//        datasetDetails.setAnalysisEndDt(ingestionRequest.getAnalysisEndDt());
+//        datasetDetails.setDtaContractCompleteFlag(ingestionRequest.getDtaContractCompleteFlag());
+//        if(!ingestionRequest.getDtaContractCompleteFlag()){
+//            datasetDetails.setDtaExpectedCompletionDate(ingestionRequest.getDtaExpectedCompletionDate());
+//        }
+//
+//        datasetDetails.setDatasetTypeRef(ingestionRequest.getDatasetTypeRef());
+//        datasetDetails.setDatasetRequiredForRef(ingestionRequest.getDatasetRequiredForRef());
+//
+//        List<DatasetRoleDetails> datasetRoleDetails = new ArrayList<>();
+//        // Check the datasetRequiredForRef to determine further dataset details
+//        // Populate dataset details for exploration type
+//        datasetDetails.setContractPartner(ingestionRequest.getContractPartner());
+//        datasetDetails.setRetentionRules(ingestionRequest.getRetentionRules());
+//        datasetDetails.setRetentionRulesContractDate(ingestionRequest.getRetentionRulesContractDate());
+//        datasetDetails.setInformationClassificationTypeRef(ingestionRequest.getInformationClassificationTypeRef());
+//        datasetDetails.setPiiTypeRef(ingestionRequest.getPiiTypeRef());
+//
+//        // Populate dataset user usage restrictions
+//        List<DatasetUserUsageRestriction> datasetUserUsageRestrictionList = new ArrayList<>();
+//        if(ingestionRequest.getUsageRestrictions() != null && !ingestionRequest.getUsageRestrictions().isEmpty()) {
+//            for(String usage :ingestionRequest.getUsageRestrictions()){
+//                DatasetUserUsageRestriction datasetUserUsageRestriction = new DatasetUserUsageRestriction();
+//                datasetUserUsageRestriction.setDatasetId(datasetDetails);
+//                datasetUserUsageRestriction.setRestrictionTypeRef("usage_restrictions");
+//                datasetUserUsageRestriction.setRestrictionRef(usage);
+//                if (datasetDetails.getDatasetUserUsageRestriction() == null) {
+//                    datasetUserUsageRestriction.setCreatedBy(createdBy);
+//                }
+//                datasetUserUsageRestriction.setModifiedBy(modifiedBy);
+//                datasetUserUsageRestrictionList.add(datasetUserUsageRestriction);
+//            }
+//        }
+//
+//        // Populate dataset user restrictions
+//        if(ingestionRequest.getUserRestrictions() != null && !ingestionRequest.getUserRestrictions().isEmpty()) {
+//            for(String usage :ingestionRequest.getUserRestrictions()){
+//                DatasetUserUsageRestriction datasetUserUsageRestriction = new DatasetUserUsageRestriction();
+//                datasetUserUsageRestriction.setDatasetId(datasetDetails);
+//                datasetUserUsageRestriction.setRestrictionTypeRef("user_restrictions");
+//                datasetUserUsageRestriction.setRestrictionRef(usage);
+//                if (datasetDetails.getDatasetUserUsageRestriction() == null) {
+//                    datasetUserUsageRestriction.setCreatedBy(createdBy);
+//                }
+//                datasetUserUsageRestriction.setModifiedBy(modifiedBy);
+//                datasetUserUsageRestrictionList.add(datasetUserUsageRestriction);
+//            }
+//        }
+//        if(datasetUserUsageRestrictionList.size() > 0){
+//            datasetDetails.setDatasetUserUsageRestriction(datasetUserUsageRestrictionList);
+//        }
+//
+//        // Populate dataset role details for data owner role
+//        DatasetRoleDetails datasetOwnerDetails = new DatasetRoleDetails();
+//        datasetOwnerDetails.setRole("data owner");
+//        datasetOwnerDetails.setName(ingestionRequest.getDatasetOwnerName());
+//        datasetOwnerDetails.setMudid(ingestionRequest.getDatasetOwnerMudid());
+//        datasetOwnerDetails.setEmail(ingestionRequest.getDatasetOwnerEmail());
+//        datasetOwnerDetails.setDatasetId(datasetDetails);
+//        datasetRoleDetails.add(datasetOwnerDetails);
+//
+//        // Populate dataset role details for data steward role
+//        DatasetRoleDetails datasetStewardDetails = new DatasetRoleDetails();
+//        datasetStewardDetails.setRole("data steward");
+//        datasetStewardDetails.setName(ingestionRequest.getDatasetStewardName());
+//        datasetStewardDetails.setMudid(ingestionRequest.getDatasetStewardMudid());
+//        datasetStewardDetails.setEmail(ingestionRequest.getDatasetStewardEmail());
+//        datasetStewardDetails.setDatasetId(datasetDetails);
+//        datasetRoleDetails.add(datasetStewardDetails);
+//
+//        // If dataset is not for exploration or is industrialization, set therapy areas, techniques & assays, and indications
+//        List<DatasetTherapy> datasetTherapies = new ArrayList<>();
+//        List<DatasetTechAndAssay> datasetTechAndAssays = new ArrayList<>();
+//        List<DatasetIndication> datasetIndications = new ArrayList<>();
+//        if(ingestionRequest.getTherapyAreas() != null && !ingestionRequest.getTherapyAreas().isEmpty()) {
+//            for(String therapy :ingestionRequest.getTherapyAreas()){
+//                DatasetTherapy  datasetTherapy= new DatasetTherapy();
+//                datasetTherapy.setDatasetId(datasetDetails);
+//                datasetTherapy.setTherapy(therapy);
+//                datasetTherapies.add(datasetTherapy);
+//            }
+//            datasetDetails.setDatasetTherapies(datasetTherapies);
+//        }
+//
+//        if(ingestionRequest.getTechniqueAndAssays() != null && !ingestionRequest.getTechniqueAndAssays().isEmpty()) {
+//            for(String technique :ingestionRequest.getTechniqueAndAssays()){
+//                DatasetTechAndAssay datasetTechAndAssay = new DatasetTechAndAssay();
+//                datasetTechAndAssay.setDatasetId(datasetDetails);
+//                datasetTechAndAssay.setTechniqueAndAssay(technique);
+//                datasetTechAndAssays.add(datasetTechAndAssay);
+//            }
+//            datasetDetails.setDatasetTechAndAssays(datasetTechAndAssays);
+//        }
+//
+//        if(ingestionRequest.getIndications() != null && !ingestionRequest.getIndications().isEmpty()) {
+//            for(String indication :ingestionRequest.getIndications()){
+//                DatasetIndication datasetIndication = new DatasetIndication();
+//                datasetIndication.setDatasetId(datasetDetails);
+//                datasetIndication.setIndication(indication);
+//                datasetIndications.add(datasetIndication);
+//            }
+//            datasetDetails.setDatasetIndications(datasetIndications);
+//        }
+//
+//        List<DatasetStudy> datasetStudies = new ArrayList<>();
+//        if(ingestionRequest.getStudyIds() != null && !ingestionRequest.getStudyIds().isEmpty()){
+//            for(String studyId : ingestionRequest.getStudyIds()) {
+//                DatasetStudy datasetStudy = new DatasetStudy();
+//                datasetStudy.setStudyId(studyId);
+//                datasetStudy.setDatasetId(datasetDetails);
+//                datasetStudies.add(datasetStudy);
+//            }
+//            datasetDetails.setDatasetStudies(datasetStudies);
+//        }
+//
+//        List<DatasetDataCategory> datasetDataCategories = new ArrayList<>();
+//        if(ingestionRequest.getDataCategoryRefs() != null && !ingestionRequest.getDataCategoryRefs().isEmpty()) {
+//            for(String dataCategory : ingestionRequest.getDataCategoryRefs()) {
+//                DatasetDataCategory datasetDataCategory = new DatasetDataCategory();
+//                datasetDataCategory.setDatasetId(datasetDetails);
+//                datasetDataCategory.setDataCategoryRef(dataCategory);
+//                datasetDataCategories.add(datasetDataCategory);
+//            }
+//            datasetDetails.setDatasetDataCategories(datasetDataCategories);
+//        }
+//
+//        // Populate dataset role details for data SME role
+//        DatasetRoleDetails datasetRoleDetail =  new DatasetRoleDetails();
+//        datasetRoleDetail.setDatasetId(datasetDetails);
+//        datasetRoleDetail.setName(ingestionRequest.getDatasetSmeName());
+//        datasetRoleDetail.setMudid(ingestionRequest.getDatasetSmeMudid());
+//        datasetRoleDetail.setEmail(ingestionRequest.getDatasetSmeEmail());
+//        datasetRoleDetail.setRole("data SME");
+//        datasetRoleDetails.add(datasetRoleDetail);
+//
+//        datasetDetails.setDatasetRoleDetails(datasetRoleDetails);
+//        datasetDetails.setIngestionRequest(ingestionRequestDetails);
+//
+//        ingestionRequestDetails.setDatasetDetails(datasetDetails);
+//
+//        // Set technical details properties from ingestionRequest object
+//        TechnicalDetails technicalDetails = new TechnicalDetails();
+//        if(ingestionRequestDetails.getTechnicalDetails() == null){
+//            technicalDetails.setCreatedBy(createdBy);
+//        }
+//        technicalDetails.setModifiedBy(modifiedBy);
+//        technicalDetails.setDataLocationPath(ingestionRequest.getDataLocationPath());
+//        technicalDetails.setDataRefreshFrequency(ingestionRequest.getDataRefreshFrequency());
+//        technicalDetails.setTargetIngestionStartDate(ingestionRequest.getTargetIngestionStartDate());
+//        technicalDetails.setTargetIngestionEndDate(ingestionRequest.getTargetIngestionEndDate());
+//        technicalDetails.setTargetPath(ingestionRequest.getTargetPath());
+//        technicalDetails.setDatasetTypeIngestionRef(ingestionRequest.getDatasetTypeIngestionRef());
+//        // Set guest users email if provided
+//        if (ingestionRequest.getGuestUsersEmail() != null && !ingestionRequest.getGuestUsersEmail().isEmpty()) {
+//            String email = String.join(",", ingestionRequest.getGuestUsersEmail());
+//            technicalDetails.setGuestUsersEmail(email);
+//        }
+//        // Set whitelist IP addresses if provided
+//        if(ingestionRequest.getWhitelistIpAddresses() != null && !ingestionRequest.getWhitelistIpAddresses().isEmpty()){
+//            String ipAddress = String.join(",", ingestionRequest.getWhitelistIpAddresses());
+//            technicalDetails.setWhitelistIpAddresses(ipAddress);
+//        }
+//        technicalDetails.setExternalStagingContainerName(ingestionRequest.getExternalStagingContainerName());
+//        technicalDetails.setDomainRequestId(ingestionRequest.getDomainRequestId());
+//        technicalDetails.setExternalDataSourceLocation(ingestionRequest.getExternalDataSourceLocation());
+//        technicalDetails.setGskAccessSourceLocationRef(ingestionRequest.getGskAccessSourceLocationRef());
+//        technicalDetails.setExternalSourceSecretKeyName(ingestionRequest.getExternalSourceSecretKeyName());
+//        technicalDetails.setIngestionRequest(ingestionRequestDetails);
+//
+//        ingestionRequestDetails.setTechnicalDetails(technicalDetails);
+//
+//        // Set request status details
+//        List<RequestStatusDetails> requestStatusDetailsList = new ArrayList<>();
+//        RequestStatusDetails requestStatusDetails = new RequestStatusDetails();
+//        Status status;
+//        if (submit) {
+//            status = statusRepository.findByStatusNameIgnoreCase(IngestionStatus.TRIAGE_PENDING_APPROVAL.toString());
+//        }
+//        else {
+//            status = statusRepository.findByStatusNameIgnoreCase(IngestionStatus.DRAFT.toString());
+//        }
+//        requestStatusDetails.setStatus(status);
+//        requestStatusDetails.setIngestionRequest(ingestionRequestDetails);
+//        requestStatusDetails.setActiveFlag(true);
+//        requestStatusDetails.setCreatedBy(createdBy);
+//        requestStatusDetails.setModifiedBy(modifiedBy);
+//        requestStatusDetailsList.add(requestStatusDetails);
+//        ingestionRequestDetails.setRequestStatusDetails(requestStatusDetailsList);
+//
+//        return getIngestionRequestDetailsDTO(ingestionRequestDetailsRepository.save(ingestionRequestDetails));
+//    }
+
+
+
     /**
      * Retrieves the details of an ingestion request by its ID.
      *
@@ -336,8 +593,10 @@ public class IngestionRequestDetailsServiceImpl implements IngestionRequestDetai
         if (requestDetailsOptional.isPresent()) {
             IngestionRequestDetails requestDetails = requestDetailsOptional.get();
             // As logged-in user details are not available, using static emails for createdBy and modifiedBy
-            String createdBy = "testStatusCreated@gamil.com"; // Update with logged-in user email
-            String modifyBy = "testStatusModify@gamil.com";  // Update with logged-in user email
+            //String createdBy = "testStatusCreated@gamil.com";
+            String createdBy = ApiConstants.DEFAULT_CREATED_BY; // Update with logged-in user email
+            String modifyBy = ApiConstants.DEFAULT_MODIFIED_BY; // Update with logged-in user email
+            //String modifyBy = "testStatusModify@gamil.com";
             List<RequestStatusDetails> requestStatusDetailsList = requestDetails.getRequestStatusDetails();
             boolean statusUpdated = false;
 

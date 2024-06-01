@@ -1,5 +1,6 @@
 package com.ddf.ingestion_ddf.service.impl;
 
+import com.ddf.ingestion_ddf.constants.ApiConstants;
 import com.ddf.ingestion_ddf.entity.IngestionRequestDetails;
 import com.ddf.ingestion_ddf.entity.ValidationNotes;
 import com.ddf.ingestion_ddf.repository.IngestionRequestDetailsRepository;
@@ -54,8 +55,10 @@ public class ValidationNotesServiceImpl implements ValidationNotesService {
         if(ingestionRequestDetails.isPresent()){
             ValidationNotes notes;
             // As logged-in user details are not available, using static emails for createdBy and modifiedBy
-            String createdBy = "testStatusCreated@gamil.com";  // Update with logged-in user email
-            String modifyBy = "testStatusModify@gamil.com";  // Update with logged-in user email
+            //String createdBy = "testStatusCreated@gamil.com";
+            String createdBy = ApiConstants.DEFAULT_CREATED_BY; // Update with logged-in user email
+            String modifyBy = ApiConstants.DEFAULT_MODIFIED_BY; // Update with logged-in user email
+            //String modifyBy = "testStatusModify@gamil.com";
 
             // Check if the note ID is provided and exists in the repository if exists then update operation needed
             if(noteId != null && validationNotesRepository.findById(noteId).isPresent()){

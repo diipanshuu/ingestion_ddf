@@ -21,11 +21,25 @@ public class IngestionRequestDetailsControllerImpl implements IngestionRequestDe
     private IngestionRequestDetailsService ingestionRequestDetailsService;
     private IngestionRequestDetailsRepository ingestionRequestDetailsRepository;
 
+    /**
+     * Constructor to initialize the controller with required services.
+     *
+     * @param ingestionRequestDetailsService The service for managing ingestion request details.
+     * @param ingestionRequestDetailsRepository The repository for accessing ingestion request details.
+     */
     public IngestionRequestDetailsControllerImpl(IngestionRequestDetailsService ingestionRequestDetailsService, IngestionRequestDetailsRepository ingestionRequestDetailsRepository) {
         this.ingestionRequestDetailsService = ingestionRequestDetailsService;
         this.ingestionRequestDetailsRepository = ingestionRequestDetailsRepository;
     }
 
+
+    /**
+     * Creates a new ingestion request.
+     *
+     * @param submit Indicates whether the request should be submitted.
+     * @param requestDto The DTO containing the details of the ingestion request.
+     * @return A ResponseEntity containing the details of the created ingestion request.
+     */
     @Override
     public ResponseEntity<IngestionRequestDetailsDTO> createIngestionRequest(
             boolean submit,
@@ -34,6 +48,12 @@ public class IngestionRequestDetailsControllerImpl implements IngestionRequestDe
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Retrieves the details of an existing ingestion request.
+     *
+     * @param ingestionRequestId The ID of the ingestion request to retrieve.
+     * @return A ResponseEntity containing the details of the ingestion request.
+     */
     @Override
     public ResponseEntity<IngestionRequestDetailsDTO> getIngestionRequest(Long ingestionRequestId) {
         IngestionRequestDetailsDTO ingestionRequestDetail = ingestionRequestDetailsService.getIngestionRequestDetail(ingestionRequestId);
@@ -44,6 +64,14 @@ public class IngestionRequestDetailsControllerImpl implements IngestionRequestDe
         }
     }
 
+    /**
+     * Updates an existing ingestion request.
+     *
+     * @param ingestionRequestId The ID of the ingestion request to update.
+     * @param submit Indicates whether the request should be submitted.
+     * @param requestDto The DTO containing the updated details of the ingestion request.
+     * @return A ResponseEntity containing the details of the updated ingestion request.
+     */
     @Override
     public ResponseEntity<IngestionRequestDetailsDTO> updateIngestionRequest(
             Long ingestionRequestId,
@@ -57,6 +85,18 @@ public class IngestionRequestDetailsControllerImpl implements IngestionRequestDe
         }
     }
 
+    /**
+     * Searches for ingestion requests based on specified criteria.
+     *
+     * @param myApprovals Indicates whether to include requests pending approval by the current user.
+     * @param mySubmissions Indicates whether to include requests submitted by the current user.
+     * @param status The status of the ingestion requests to retrieve.
+     * @param page The page number for pagination.
+     * @param perPage The number of results per page for pagination.
+     * @param orderBy The field to order the results by.
+     * @param orderDirection The direction of the ordering (ascending or descending).
+     * @return A ResponseEntity containing a summary of the matching ingestion requests.
+     */
     @Override
     public ResponseEntity<IngestionRequestSummaryDTO> searchIngestionRequests(
             boolean myApprovals,
